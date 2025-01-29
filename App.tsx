@@ -1,118 +1,151 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import { Camera, CameraRef, Images, MapView, MapViewRef, RegionPayload, ShapeSource, SymbolLayer, SymbolLayerStyle } from '@maplibre/maplibre-react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { mapStyle } from './mapStyle';
+import { Dimensions, PixelRatio, Platform } from 'react-native';
+import pois from './pois';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const SIZE_L = 14;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const baseStyle: SymbolLayerStyle = {
+  symbolSortKey: ['get', 'priority'],
+  textHaloWidth: 2,
+  textHaloBlur: 0,
+  textAnchor: 'top',
+  textMaxWidth: 10,
+  //textFont: ['get', 'textFont'],
+  iconAllowOverlap: false,
+  textAllowOverlap: false,
+  iconSize: 1 / 2,
+  iconOptional: false,
+  iconAnchor: 'bottom',
+  textOffset: [0, 0.1],
+};
+
+const pinLargeStyle: SymbolLayerStyle = {
+  ...baseStyle,
+  textField: ['get', 'title'],
+  textSize: SIZE_L,
+  textColor: ['get', 'textColor'],
+  textHaloColor: ['get', 'textHaloColor'],
+  iconImage: 'poi_L',
+};
+
+const pinMediumStyle: SymbolLayerStyle = {
+  ...baseStyle,
+  iconImage: 'poi_M',
+};
+
+
+const pinSmallStyle: SymbolLayerStyle = {
+  iconImage: 'poi_S',
+  iconAnchor: 'center',
+  iconSize: 1 / 2,
+};
+
+
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const camera = useRef<CameraRef>(null);
+  const map = useRef<MapViewRef>(null);
+  const [renderedFeatureIds, setRenderedFeatureIds] = useState<string[]>([]);
+  const [cameraPosition, setCameraPosition] = useState<number[]>([14.4285631, 50.0806125]);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+
+  const images = {
+    poi_S: require('./icons/poi-s.png'),
+    poi_M: require('./icons/poi-m.png'),
+    poi_L: require('./icons/poi-l.png'),
   };
 
+  const featuresCollection: GeoJSON.FeatureCollection = useMemo(() => {
+    const features: GeoJSON.FeatureCollection =
+    {
+      type: 'FeatureCollection',
+      features: pois.map(p => ({
+        type: 'Feature',
+        id: p.id,
+        properties: {
+          title: p.name,
+          priority: 100 - p.priority,
+          textColor: 'black',
+          textHaloColor: 'white',
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [p.latitude, p.longitude],
+        },
+      })),
+    };
+
+    return features;
+  }, []);
+
+  const bbox: [number, number, number, number] = useMemo(() => [
+    0,
+    0,
+    9999,//Platform.OS === 'ios' ? mapHeight : PixelRatio.getPixelSizeForLayoutSize(mapHeight),
+    9999,//Platform.OS === 'ios' ? displayWidth : PixelRatio.getPixelSizeForLayoutSize(displayWidth),
+  ], []);
+
+
+
+  const onBoundsChanged = useCallback((bounds: GeoJSON.Feature<GeoJSON.Point, RegionPayload>) => {
+    console.log('onBoundsChanged', bounds.properties.visibleBounds);
+    const func = async () => {
+      const renderedFeatures = await map.current?.queryRenderedFeaturesInRect(bbox, undefined, ['layer1', 'large']);
+      const ids = renderedFeatures?.features.filter(f => f.id).map(f => `${f.id}`) || [];
+      console.log('rendered:', ids);
+
+      if (renderedFeatures && renderedFeatures?.features.length > 0) {
+        const combinedArray = Array.from(new Set(renderedFeatures?.features.map((f) => `${f.id}`).concat(renderedFeatureIds.slice(0, 100))));
+        setRenderedFeatureIds(combinedArray);
+      }
+    };
+
+    func();
+    // don't depend on `renderedFeatures` to eliminate infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, bbox, setRenderedFeatureIds]);
+
+  const style = useMemo(() => ({ flex: 1 }), []);
+
+
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+    <MapView
+      ref={map}
+      style={style}
+      //mapStyle={mapStyle}
+      onRegionDidChange={onBoundsChanged}
+    //onDidFailLoadingMap={useCallback(() => setIsMounted(true), [])}
+    //onDidFinishLoadingMap={useCallback(() => setIsMounted(true), [])}
+    >
+      <Camera ref={camera}
+        centerCoordinate={cameraPosition}
+        zoomLevel={16}
       />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <Images images={images} />
+      <ShapeSource
+        id="layer1"
+        shape={featuresCollection}
+      >
+        <SymbolLayer
+          id="small"
+          style={pinSmallStyle}
+        />
+        <SymbolLayer
+          id="medium"
+          style={pinMediumStyle}
+        />
+        <SymbolLayer
+          id="large"
+          style={pinLargeStyle}
+        />
+      </ShapeSource>
+    </MapView>
   );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
