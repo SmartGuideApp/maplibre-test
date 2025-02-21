@@ -1,20 +1,13 @@
-import { Camera, CameraRef, Images, MapView, MapViewRef, RegionPayload, ShapeSource, SymbolLayer, SymbolLayerStyle } from '@maplibre/maplibre-react-native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
-import { mapStyle } from './mapStyle';
-import { Dimensions, PixelRatio, Platform } from 'react-native';
+import { Camera, CameraRef, Images, MapView, MapViewRef, ShapeSource, SymbolLayer, SymbolLayerStyle } from '@maplibre/maplibre-react-native';
+import React, { useMemo, useRef, useState } from 'react';
 import pois from './pois';
 
-
-const SIZE_L = 14;
-
 const baseStyle: SymbolLayerStyle = {
-  symbolSortKey: ['get', 'priority'],
+  symbolSortKey: ['get', 'priority'], // comment this out to increase performance
   textHaloWidth: 2,
   textHaloBlur: 0,
   textAnchor: 'top',
   textMaxWidth: 10,
-  //textFont: ['get', 'textFont'],
   iconAllowOverlap: false,
   textAllowOverlap: false,
   iconSize: 1 / 2,
@@ -26,7 +19,7 @@ const baseStyle: SymbolLayerStyle = {
 const pinLargeStyle: SymbolLayerStyle = {
   ...baseStyle,
   textField: ['get', 'title'],
-  textSize: SIZE_L,
+  textSize: 14,
   textColor: ['get', 'textColor'],
   textHaloColor: ['get', 'textHaloColor'],
   iconImage: 'poi_L',
@@ -44,14 +37,10 @@ const pinSmallStyle: SymbolLayerStyle = {
   iconSize: 1 / 2,
 };
 
-
-
 function App(): React.JSX.Element {
   const camera = useRef<CameraRef>(null);
   const map = useRef<MapViewRef>(null);
-  const [renderedFeatureIds, setRenderedFeatureIds] = useState<string[]>([]);
-  const [cameraPosition, setCameraPosition] = useState<number[]>([14.4285631, 50.0806125]);
-
+  const [cameraPosition] = useState<number[]>([14.4285631, 50.0806125]);
 
   const images = {
     poi_S: require('./icons/poi-s.png'),
@@ -82,44 +71,12 @@ function App(): React.JSX.Element {
     return features;
   }, []);
 
-  const bbox: [number, number, number, number] = useMemo(() => [
-    0,
-    0,
-    9999,//Platform.OS === 'ios' ? mapHeight : PixelRatio.getPixelSizeForLayoutSize(mapHeight),
-    9999,//Platform.OS === 'ios' ? displayWidth : PixelRatio.getPixelSizeForLayoutSize(displayWidth),
-  ], []);
-
-
-
-  const onBoundsChanged = useCallback((bounds: GeoJSON.Feature<GeoJSON.Point, RegionPayload>) => {
-    console.log('onBoundsChanged', bounds.properties.visibleBounds);
-    const func = async () => {
-      const renderedFeatures = await map.current?.queryRenderedFeaturesInRect(bbox, undefined, ['layer1', 'large']);
-      const ids = renderedFeatures?.features.filter(f => f.id).map(f => `${f.id}`) || [];
-      console.log('rendered:', ids);
-
-      if (renderedFeatures && renderedFeatures?.features.length > 0) {
-        const combinedArray = Array.from(new Set(renderedFeatures?.features.map((f) => `${f.id}`).concat(renderedFeatureIds.slice(0, 100))));
-        setRenderedFeatureIds(combinedArray);
-      }
-    };
-
-    func();
-    // don't depend on `renderedFeatures` to eliminate infinite loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, bbox, setRenderedFeatureIds]);
-
   const style = useMemo(() => ({ flex: 1 }), []);
-
 
   return (
     <MapView
       ref={map}
       style={style}
-      //mapStyle={mapStyle}
-      onRegionDidChange={onBoundsChanged}
-    //onDidFailLoadingMap={useCallback(() => setIsMounted(true), [])}
-    //onDidFinishLoadingMap={useCallback(() => setIsMounted(true), [])}
     >
       <Camera ref={camera}
         centerCoordinate={cameraPosition}
@@ -146,6 +103,5 @@ function App(): React.JSX.Element {
     </MapView>
   );
 }
-
 
 export default App;
