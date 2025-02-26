@@ -8,10 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* maplibretestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* maplibretestTests.m */; };
+		06A3EF562D6F68E90095B595 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = EC0320527C07DB7A3054A11F /* MapLibre */; };
+		06A3EF572D6F68E90095B595 /* MapLibre in Frameworks */ = {isa = PBXBuildFile; productRef = F62ED3B77F96D85CB5613411 /* MapLibre */; };
 		0C80B921A6F3F58F76C31292 /* libPods-maplibretest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-maplibretest.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		3C3A3C8E78AE08CCF837E203 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		7699B88040F8A987B510C191 /* libPods-maplibretest-maplibretestTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19F6CBCC0A4E27FBF8BF4A61 /* libPods-maplibretest-maplibretestTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -52,6 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06A3EF572D6F68E90095B595 /* MapLibre in Frameworks */,
 				7699B88040F8A987B510C191 /* libPods-maplibretest-maplibretestTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -60,6 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06A3EF562D6F68E90095B595 /* MapLibre in Frameworks */,
 				0C80B921A6F3F58F76C31292 /* libPods-maplibretest.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -170,6 +175,9 @@
 				00E356F51AD99517003FC87E /* PBXTargetDependency */,
 			);
 			name = maplibretestTests;
+			packageProductDependencies = (
+				F62ED3B77F96D85CB5613411 /* MapLibre */,
+			);
 			productName = maplibretestTests;
 			productReference = 00E356EE1AD99517003FC87E /* maplibretestTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -191,6 +199,9 @@
 			dependencies = (
 			);
 			name = maplibretest;
+			packageProductDependencies = (
+				EC0320527C07DB7A3054A11F /* MapLibre */,
+			);
 			productName = maplibretest;
 			productReference = 13B07F961A680F5B00A75B9A /* maplibretest.app */;
 			productType = "com.apple.product-type.application";
@@ -221,6 +232,9 @@
 				Base,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
+			packageReferences = (
+				09C9AE48B0D472A4DF8D11B3 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */,
+			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -245,6 +259,7 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				3C3A3C8E78AE08CCF837E203 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,6 +483,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = maplibretest/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -584,7 +600,11 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
+				OTHER_LDFLAGS = "$(inherited)  ";
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				USE_HERMES = true;
 			};
 			name = Debug;
 		};
@@ -649,7 +669,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
+				OTHER_LDFLAGS = "$(inherited)  ";
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -685,6 +708,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		09C9AE48B0D472A4DF8D11B3 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maplibre/maplibre-gl-native-distribution";
+			requirement = {
+				kind = exactVersion;
+				version = 6.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EC0320527C07DB7A3054A11F /* MapLibre */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 09C9AE48B0D472A4DF8D11B3 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
+			productName = MapLibre;
+		};
+		F62ED3B77F96D85CB5613411 /* MapLibre */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 09C9AE48B0D472A4DF8D11B3 /* XCRemoteSwiftPackageReference "maplibre-gl-native-distribution" */;
+			productName = MapLibre;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
 }
