@@ -17,27 +17,6 @@ const baseStyle: SymbolLayerStyle = {
   textOffset: [0, 0.1],
 };
 
-const staticPinLargeStyle: SymbolLayerStyle = {
-  ...baseStyle,
-  textField: ['get', 'title'],
-  textSize: 14,
-  textColor: ['get', 'textColor'],
-  textHaloColor: ['get', 'textHaloColor'],
-  iconImage: 'poi_L',
-};
-
-const staticPinMediumStyle: SymbolLayerStyle = {
-  ...baseStyle,
-  iconImage: 'poi_M',
-};
-
-
-const staticPinSmallStyle: SymbolLayerStyle = {
-  iconImage: 'poi_S',
-  iconAnchor: 'center',
-  iconSize: 1 / 2,
-};
-
 const pragueLocation = [14.4285631, 50.0806125];
 const innsbruckLocation = [11.3824194, 47.2648672];
 
@@ -102,6 +81,16 @@ function App(): React.JSX.Element {
     }
   }, []);
 
+  const pinTopStyle: SymbolLayerStyle = {
+    ...baseStyle,
+    textField: ['get', 'title'],
+    textSize: 20,
+    textColor: 'black',
+    textHaloColor: 'yellow',
+    textHaloWidth: 5,
+    iconImage: 'poi_L',
+  };
+
   const [pinLargeStyle, setPinLargeStyle] = useState<SymbolLayerStyle>({
     ...baseStyle,
     textField: ['get', 'title'],
@@ -127,7 +116,6 @@ function App(): React.JSX.Element {
     const newValue = !useSymbolSortKey;
     setUseSymbolSortKey(newValue);
     if (newValue) {
-      setUseStaticStyle(false);
       setPinLargeStyle({...pinLargeStyle, symbolSortKey: ['get', 'priority']});
       setPinMediumStyle({...pinMediumStyle, symbolSortKey: ['get', 'priority']});
       setPinSmallStyle({...pinSmallStyle, symbolSortKey: ['get', 'priority']});
@@ -140,16 +128,6 @@ function App(): React.JSX.Element {
       /* eslint-enable @typescript-eslint/no-unused-vars */
     }
   }, [pinLargeStyle, pinMediumStyle, pinSmallStyle, useSymbolSortKey]);
-
-  const [useStaticStyle, setUseStaticStyle] = useState<boolean>(false);
-
-  const onStaticStyleToggle = useCallback(() => {
-    const newValue = !useStaticStyle;
-    setUseStaticStyle(newValue);
-    if (newValue){
-      setUseSymbolSortKey(false);
-    }
-  }, [useStaticStyle]);
 
   console.log('rerender');
 
@@ -173,15 +151,20 @@ function App(): React.JSX.Element {
       >
         <SymbolLayer
           id="small"
-          style={useStaticStyle ? staticPinSmallStyle : pinSmallStyle}
+          style={pinSmallStyle}
         />
         <SymbolLayer
           id="medium"
-          style={useStaticStyle ? staticPinMediumStyle : pinMediumStyle}
+          style={pinMediumStyle}
         />
         <SymbolLayer
           id="large"
-          style={useStaticStyle ? staticPinLargeStyle : pinLargeStyle}
+          style={pinLargeStyle}
+        />
+        <SymbolLayer
+          id="top-prio"
+          style={pinTopStyle}
+          filter={['==', '$id', `${prioPoiId}`]}
         />
       </ShapeSource>
     </MapView>
@@ -191,12 +174,6 @@ function App(): React.JSX.Element {
         <View style={{flexDirection: 'row', justifyContent: 'space-around' }}>
           <Text style={{verticalAlign: 'middle'}}>use symbolSortKey in style</Text>
           <Switch style={{marginVertical: 16}} value={useSymbolSortKey} onValueChange={onSymbolSortKeyToggle} />
-        </View>
-      </TouchableHighlight>
-      <TouchableHighlight onPress={onStaticStyleToggle}>
-        <View style={{flexDirection: 'row', justifyContent: 'space-around' }}>
-          <Text style={{verticalAlign: 'middle'}}>use static style</Text>
-          <Switch style={{marginVertical: 16}} value={useStaticStyle} onValueChange={onStaticStyleToggle} />
         </View>
       </TouchableHighlight>
       <Text style={{marginVertical: 6}}>{`1st feature: ${featuresCollection.features[0].properties?.title}`}</Text>
